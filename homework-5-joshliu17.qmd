@@ -4,3 +4,41 @@ author: "Josh Liu"
 format: html
 editor: visual
 ---
+
+```{r}
+#| warning: false
+library(tidyverse)
+```
+
+
+## Prediction in the Maze
+
+background stuff. the hypothesis was...
+
+## Codebook/Data Dictionary
+
+These are the variables in the raw data
+
+## Importing Data
+
+```{r}
+
+#directory <- "C:\\Users\\Matt\\Dropbox\\Research\\delong maze\\"
+here::i_am("analysis/homework-5-joshliu17.qmd")
+library(here)
+
+d <- read.csv(here("data/delong maze 40Ss.csv"), 
+              header = 0, sep = ",", comment.char = "#", strip.white = T,
+              col.names = c("Index","Time","Counter","Hash","Owner","Controller","Item","Element","Type","Group","FieldName","Value","WordNum","Word","Alt","WordOn","CorrWord","RT","Sent","TotalTime","Question","Resp","Acc","RespRT"));
+
+
+
+```
+
+
+
+
+
+
+
+
