@@ -1,0 +1,217 @@
+---
+title: "Homework 5"
+author: "Josh Liu"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+#| warning: false
+#install.packages("gt")
+#install.packages("plotly")
+#nstall.packages("lme4")
+#install.packages("lmerTest")
+#install.packages("logistf")
+library(tidyverse)
+library(gt)
+library(plotly)
+library(lme4)
+library(lmerTest)
+library(logistf)
+```
+
+## Importing Data
+
+```{r}
+
+#directory <- "C:\\Users\\Matt\\Dropbox\\Research\\delong maze\\"
+here::i_am("analysis/homework-5-joshliu17.qmd")
+library(here)
+
+d <- read.csv(here("data/delong maze 40Ss.csv"), 
+              header = 0, sep = ",", comment.char = "#", strip.white = T,
+              col.names = c("Index","Time","Counter","Hash","Owner","Controller","Item","Element","Type","Group","FieldName","Value","WordNum","Word","Alt","WordOn","CorrWord","RT","Sent","TotalTime","Question","Resp","Acc","RespRT"));
+
+```
+
+## Prediction in the Maze
+
+The study investigates whether comprehenders engage in predictive processing by pre-activating the phonetic form of upcoming expected words. The hypothesis is that if comprehenders predict upcoming words, there should be evidence of pre-activation of the expected word's form, including its required indefinite article (a/an). The key manipulation involves sentence contexts that strongly constrain for an expected noun (e.g. "The day was breezy so the boy went outside to fly...") versus an unexpected noun. The expected and unexpected nouns require different indefinite article forms (a kite vs. an airplane). Some example sentences from the stimuli: Expected: "The highlight of Jack's trip to India was when he got to ride an elephant in the parade." Unexpected: "The highlight of Jack's trip to India was when he got to ride a bicycle in the parade." "You never forget how to ride an elephant once you've learned." The study uses an A-maze task which presents sentences word-by-word with participants having to choose the correct word between two alternatives at each step. Response times on the article (a/an) and noun are measured to see if they are slower for unexpected compared to expected continuations, which would suggest pre-activation of the expected word's form. background stuff. 
+
+## Codebook/Data Dictionary
+
+These are the variables in the raw data.
+
+| Variable   | Description                                     |
+|------------|-------------------------------------------------|
+| Index      | Results Index                                   |
+| Time       | Time                                            |
+| Counter    | Counter                                         |
+| Hash       | Participant Identifier                          |
+| Owner      | Logged in as experiment owner? (Yes or No)      |
+| Controller | Controller Name                                 |
+| Item       | Item Number                                     |
+| Element    | Element Number                                  |
+| Type       | Type                                            |
+| Group      | Group                                           |
+| FieldName  | Field Name                                      |
+| Value      | Field Value                                     |
+| WordNum    | Word Number                                     |
+| Word       | Word                                            |
+| Alt        | Alternative                                     |
+| WordOn     | Word on (0=left, 1=right)                       |
+| CorrWord   | Correct                                         |
+| RT         | Reading time to first answer                    |
+| Sent       | Sentence                                        |
+| TotalTime  | Total time to correct answer                    |
+| Question   | Question (NULL if none)                         |
+| Resp       | Answer                                          |
+| Acc        | Whether or not answer was correct (NULL if N/A) |
+| RespRT     | Time taken to answer.                           |
+
+## Number of Participants
+
+```{r}
+
+n_distinct(d$Hash)
+
+```
+
+To determine the number of participants in this study, I used a formula to count the number of distinct values in the 'Hash' column, which is the participant identifier column. While 1 participant had to be excluded from initial analysis because their results did not transfer, there were 40 participants.
+
+```{r}
+df_all <- read.csv(here("data/delong maze 40Ss.csv"),
+  header = 1, sep = ",", comment.char = "#", strip.white = T,
+  col.names = c("Index", "Time", "Counter", "Hash", "Owner", 
+                "Controller", "Item", "Element", "Type", "Group", 
+                "FieldName", "Value", "WordNum", "Word", "Alt", 
+                "WordOn", "CorrWord", "RT", "Sent", "TotalTime", 
+                "Question", "Resp", "Acc", "RespRT")
+)
+```
+
+## Sorting Through the Data
+
+```{r}
+df_rt <- df_all |> 
+  filter(Controller == "Maze" & !str_detect(Type, "prac")) |> 
+  select(1:10, 13:20) |> 
+  separate(col = Type, 
+           into = c("exp", "item", "expect", "position", "pos", 
+                    "cloze", "art.cloze", "n.cloze"), 
+           sep = "\\.", convert = TRUE, fill = "right") |> 
+  mutate(WordNum = as.numeric(WordNum),
+         Acc = as.numeric(as.character(recode(CorrWord, yes = "1", no = "0"))),
+         n.cloze.scale =  scale(n.cloze), 
+         art.cloze.scale = scale(art.cloze)) |> 
+  mutate(across(where(is.character), as.factor)) |> 
+  filter(item != 29) |> 
+  filter(Hash != "9dAvrH0+R6a0U5adPzZSyA")
+```
+
+We excluded (1) practice trials, as seen through separating the Type column out, and filtering out the observations that say "prac" (2) all rows related to Item 29 were removed due to a coding error in the original study (3) rows where the "Hash" was "9dAvrH0+R6a0U5adPzZSyA", as this participant's results did not transfer. After these exclusions, we were left with 67,526 rows.
+
+```{r}
+# Replace empty strings with NA in all columns
+d[d == ""] <- NA
+# Omit rows with NA values in any column
+d_cleaned <- d[complete.cases(d$Value), ]
+
+d_pivot <- d_cleaned %>%
+ pivot_wider(names_from = FieldName, values_from = Value)
+
+d_age <- d_pivot[complete.cases(d_pivot$age), ] %>%
+  select(age)
+
+is.numeric(d_age$age)
+
+knitr::kable(
+  data.frame("Mean" = mean(d_age$age),
+    "Minimum" = min(d_age$age), 
+    "Maximum" = max(d_age$age), 
+    "Standard Deviation" = sd(d_age$age)
+    ),
+  row.names = FALSE
+  )
+
+#I can find the min, max, and standard deviation, but the mean function does not work because it is saying that the age column is not a numeric variable. I've tried to convert it to a numeric variable but I can't figure it out.
+
+```
+
+## Reproducing Figure 1
+
+```{r}
+
+rt.s <- df_rt 
+
+rt.s$rgn.fix <- rt.s$WordNum - rt.s$pos + 1
+rt.s$word.num.z <- scale(rt.s$WordNum)
+rt.s$word.len <- nchar(as.character(rt.s$Word))
+rt.s$Altword.len <- nchar(as.character(rt.s$Alt))
+# simplying by using dummy/treatment coding instead of sum coding
+# 'expected' will be reference level
+#contrasts(rt.s$expect) <- c(-.5,.5)
+
+rt.s$item.expect <- paste(rt.s$item, rt.s$expect, sep=".")
+rt.s.filt <- rt.s[rt.s$Hash != "gyxidIf0fqXBM7nxg2K7SQ" & rt.s$Hash != "f8dC3CkleTBP9lUufzUOyQ",]
+
+rgn.rt.raw <- rt.s.filt %>%
+  filter(rgn.fix > -4 & rgn.fix < 5) %>%
+  filter(Acc == 1) %>%
+  group_by(rgn.fix, expect) %>%
+  summarize(n = n(), subj = length(unique(Hash)), rt = mean(RT), 
+            sd = sd(RT), stderr = sd / sqrt(subj)) %>%
+  as.data.frame()
+rgn.rt.raw$rgn <- as.factor(recode(rgn.rt.raw$rgn.fix, "-3"="CW-3", "-2"="CW-2", "-1"="CW-1", "0"="art", "1"="n","2"="CW+1", "3"="CW+2", "4"="CW+3"))
+rgn.rt.raw$rgn <- ordered(rgn.rt.raw$rgn, levels = c("CW-3", "CW-2", "CW-1", "art", "n", "CW+1", "CW+2", "CW+3"))
+
+
+```
+
+```{r}
+#Response accuracy
+rt.s %>% filter(rgn.fix > -4 & rgn.fix < 5) %>% summarize(n=n(), acc=mean(Acc), sd=sd(Acc), error=1-acc)
+rt.s %>% filter(rgn.fix == 0) %>% summarize(n=n(), acc=mean(Acc), sd=sd(Acc), error=1-acc)
+rt.s %>% filter(rgn.fix == 1) %>% summarize(n=n(), acc=mean(Acc), sd=sd(Acc), error=1-acc)
+rt.s %>% filter(rgn.fix > -4 & rgn.fix < 4) %>% group_by(Hash) %>% summarize(n=n(), acc=mean(Acc), sd=sd(Acc), error=1-acc) %>% mutate(keep = acc > mean(acc)-2*sd(acc)) %>% arrange(acc) %>% as.data.frame()
+
+```
+
+```{r}
+#Analyze Response Times
+rt.s.filt %>% filter(rgn.fix > -4 & rgn.fix < 5) %>% filter(Acc == 1) %>% summarize(n=n(), rt=mean(RT), rt.sd=sd(RT), med=median(RT), rt.min=min(RT), rt.max=max(RT))
+rt.s.filt %>% filter(rgn.fix > -4 & rgn.fix < 5) %>% filter(Acc == 1) %>% group_by(Hash) %>% summarize(n=n(), rt=mean(RT), rt.sd=sd(RT), med=median(RT), rt.min=min(RT), rt.max=max(RT)) %>% mutate(keep = rt > mean(rt)-2*sd(rt) | rt < mean(rt)+2*sd(rt)) %>% as.data.frame()
+
+```
+
+```{r}
+rgn.rt.raw <- rt.s.filt %>% filter(rgn.fix > -4 & rgn.fix < 5) %>% filter(Acc == 1) %>% group_by(rgn.fix, expect) %>% summarize(n=n(), subj=length(unique(Hash)), rt=mean(RT), sd=sd(RT), stderr=sd/sqrt(subj)) %>% as.data.frame()
+rgn.rt.raw$rgn <- as.factor(recode(rgn.rt.raw$rgn.fix, "-3"="CW-3", "-2"="CW-2", "-1"="CW-1", "0"="art", "1"="n","2"="CW+1", "3"="CW+2", "4"="CW+3"))
+rgn.rt.raw$rgn <- ordered(rgn.rt.raw$rgn, levels = c("CW-3", "CW-2", "CW-1", "art", "n", "CW+1", "CW+2", "CW+3"))
+ggplot(rgn.rt.raw, aes(x=rgn, y=rt, group=expect, shape=expect)) +
+  geom_line(stat = "identity", position=position_dodge(width=.3)) +
+  geom_point(stat = "identity", position=position_dodge(width=.3), size=3) +
+  geom_errorbar(aes(ymin = rt-stderr, ymax = rt+stderr), width=.15, position=position_dodge(width=.3)) +
+  scale_shape_manual(name="", labels=c("Expected", "Unexpected"), values = c(21,19)) + 
+  xlab("Word") + ylab("Reading Time (msec)") + 
+  theme_bw()
+```
+
+Figure 1 shows a plot of respondents response times by region. 
+
+```{r}
+
+rt.s.filt %>%
+  group_by(expect, n.cloze.scale) %>%
+  summarize(
+    mean(RT)
+  )
+```
+
+To reproduce the results in Figure 1 into a table format, I took the data set and grouped it by the variables "expect" and "n.cloze.scale", and summarized the means.
+
+
+
+
