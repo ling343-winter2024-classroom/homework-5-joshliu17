@@ -123,7 +123,7 @@ d_pivot <- d_cleaned %>%
  pivot_wider(names_from = FieldName, values_from = Value)
 
 d_age <- d_pivot[complete.cases(d_pivot$age), ] %>%
-  select(age) %>%
+  select(age)
 
 is.numeric(d_age$age)
 
@@ -139,7 +139,6 @@ knitr::kable(
 #I can find the min, max, and standard deviation, but the mean function does not work because it is saying that the age column is not a numeric variable. I've tried to convert it to a numeric variable but I can't figure it out.
 
 ```
-
 
 ## Reproducing Figure 1
 
@@ -200,4 +199,4 @@ ggplot(rgn.rt.raw, aes(x=rgn, y=rt, group=expect, shape=expect)) +
   theme_bw()
 ```
 
-I found in the author's original code how to reproduce the figure in Figure 1. 
+I found in the author's original code how to reproduce the figure in Figure 1.
