@@ -38,7 +38,7 @@ d <- read.csv(here("data/delong maze 40Ss.csv"),
 
 ## Prediction in the Maze
 
-The study investigates whether comprehenders engage in predictive processing by pre-activating the phonetic form of upcoming expected words. The hypothesis is that if comprehenders predict upcoming words, there should be evidence of pre-activation of the expected word's form, including its required indefinite article (a/an). The key manipulation involves sentence contexts that strongly constrain for an expected noun (e.g. "The day was breezy so the boy went outside to fly...") versus an unexpected noun. The expected and unexpected nouns require different indefinite article forms (a kite vs. an airplane). Some example sentences from the stimuli: Expected: "The highlight of Jack's trip to India was when he got to ride an elephant in the parade." Unexpected: "The highlight of Jack's trip to India was when he got to ride a bicycle in the parade." "You never forget how to ride an elephant once you've learned." The study uses an A-maze task which presents sentences word-by-word with participants having to choose the correct word between two alternatives at each step. Response times on the article (a/an) and noun are measured to see if they are slower for unexpected compared to expected continuations, which would suggest pre-activation of the expected word's form. background stuff. the hypothesis was...
+The study investigates whether comprehenders engage in predictive processing by pre-activating the phonetic form of upcoming expected words. The hypothesis is that if comprehenders predict upcoming words, there should be evidence of pre-activation of the expected word's form, including its required indefinite article (a/an). The key manipulation involves sentence contexts that strongly constrain for an expected noun (e.g. "The day was breezy so the boy went outside to fly...") versus an unexpected noun. The expected and unexpected nouns require different indefinite article forms (a kite vs. an airplane). Some example sentences from the stimuli: Expected: "The highlight of Jack's trip to India was when he got to ride an elephant in the parade." Unexpected: "The highlight of Jack's trip to India was when he got to ride a bicycle in the parade." "You never forget how to ride an elephant once you've learned." The study uses an A-maze task which presents sentences word-by-word with participants having to choose the correct word between two alternatives at each step. Response times on the article (a/an) and noun are measured to see if they are slower for unexpected compared to expected continuations, which would suggest pre-activation of the expected word's form. background stuff. 
 
 ## Codebook/Data Dictionary
 
@@ -199,4 +199,19 @@ ggplot(rgn.rt.raw, aes(x=rgn, y=rt, group=expect, shape=expect)) +
   theme_bw()
 ```
 
-I found in the author's original code how to reproduce the figure in Figure 1.
+Figure 1 shows a plot of respondents response times by region. 
+
+```{r}
+
+rt.s.filt %>%
+  group_by(expect, n.cloze.scale) %>%
+  summarize(
+    mean(RT)
+  )
+```
+
+To reproduce the results in Figure 1 into a table format, I took the data set and grouped it by the variables "expect" and "n.cloze.scale", and summarized the means.
+
+
+
+

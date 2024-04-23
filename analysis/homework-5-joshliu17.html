@@ -131,7 +131,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="prediction-in-the-maze" class="level2">
 <h2 class="anchored" data-anchor-id="prediction-in-the-maze">Prediction in the Maze</h2>
-<p>The study investigates whether comprehenders engage in predictive processing by pre-activating the phonetic form of upcoming expected words. The hypothesis is that if comprehenders predict upcoming words, there should be evidence of pre-activation of the expected word’s form, including its required indefinite article (a/an). The key manipulation involves sentence contexts that strongly constrain for an expected noun (e.g.&nbsp;“The day was breezy so the boy went outside to fly…”) versus an unexpected noun. The expected and unexpected nouns require different indefinite article forms (a kite vs.&nbsp;an airplane). Some example sentences from the stimuli: Expected: “The highlight of Jack’s trip to India was when he got to ride an elephant in the parade.” Unexpected: “The highlight of Jack’s trip to India was when he got to ride a bicycle in the parade.” “You never forget how to ride an elephant once you’ve learned.” The study uses an A-maze task which presents sentences word-by-word with participants having to choose the correct word between two alternatives at each step. Response times on the article (a/an) and noun are measured to see if they are slower for unexpected compared to expected continuations, which would suggest pre-activation of the expected word’s form. background stuff. the hypothesis was…</p>
+<p>The study investigates whether comprehenders engage in predictive processing by pre-activating the phonetic form of upcoming expected words. The hypothesis is that if comprehenders predict upcoming words, there should be evidence of pre-activation of the expected word’s form, including its required indefinite article (a/an). The key manipulation involves sentence contexts that strongly constrain for an expected noun (e.g.&nbsp;“The day was breezy so the boy went outside to fly…”) versus an unexpected noun. The expected and unexpected nouns require different indefinite article forms (a kite vs.&nbsp;an airplane). Some example sentences from the stimuli: Expected: “The highlight of Jack’s trip to India was when he got to ride an elephant in the parade.” Unexpected: “The highlight of Jack’s trip to India was when he got to ride a bicycle in the parade.” “You never forget how to ride an elephant once you’ve learned.” The study uses an A-maze task which presents sentences word-by-word with participants having to choose the correct word between two alternatives at each step. Response times on the article (a/an) and noun are measured to see if they are slower for unexpected compared to expected continuations, which would suggest pre-activation of the expected word’s form. background stuff.</p>
 </section>
 <section id="codebookdata-dictionary" class="level2">
 <h2 class="anchored" data-anchor-id="codebookdata-dictionary">Codebook/Data Dictionary</h2>
@@ -490,7 +490,36 @@ returning NA</code></pre>
 <p><img src="homework-5-joshliu17_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>I found in the author’s original code how to reproduce the figure in Figure 1.</p>
+<p>Figure 1 shows a plot of respondents response times by region.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>rt.s.filt <span class="sc">%&gt;%</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(expect, n.cloze.scale) <span class="sc">%&gt;%</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mean</span>(RT)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'expect'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 39 × 3
+# Groups:   expect [2]
+   expect   n.cloze.scale[,1] `mean(RT)`
+   &lt;fct&gt;                &lt;dbl&gt;      &lt;dbl&gt;
+ 1 expected           -0.569        807.
+ 2 expected           -0.470        895.
+ 3 expected           -0.297        793.
+ 4 expected           -0.223        789.
+ 5 expected           -0.149        790.
+ 6 expected            0.0984       825.
+ 7 expected            0.173        858.
+ 8 expected            0.271        794.
+ 9 expected            0.346        801.
+10 expected            0.395        798.
+# ℹ 29 more rows</code></pre>
+</div>
+</div>
+<p>To reproduce the results in Figure 1 into a table format, I took the data set and grouped it by the variables “expect” and “n.cloze.scale”, and summarized the means.</p>
 </section>
 
 </main>
